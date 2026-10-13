@@ -1,0 +1,22 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  notebook:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Notebook-only repo: the gate is that the .ipynb stays well-formed —
+      # valid JSON, nbformat 4, and every cell carrying a cell_type.
+      - name: Validate the notebook
+        run: >-
+          python -c "import json,sys;d=json.load(open('TensorFlow_and_Keras_1.ipynb'));assert d.get('nbformat')==4,'nbformat';c=d.get('cells') or [];assert c,'no cells';assert all(x.get('cell_type') for x in c),'untyped cell';print('ok: cells=',len(c))"
